@@ -27,6 +27,15 @@ const PORT = process.env.PORT;
 const httpServer = createServer(app);
 initializeSocket(httpServer);
 
+// Health check — registered BEFORE all middleware (Clerk, CORS, etc.)
+// so nothing can intercept it. Supports both GET and HEAD (UptimeRobot uses HEAD).
+app.get("/health", (req, res) => {
+	res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+app.head("/health", (req, res) => {
+	res.sendStatus(200);
+});
+
 // Allow both localhost (dev) and Vercel (prod) frontend origins
 const allowedOrigins = [
 	"http://localhost:3000",
@@ -76,14 +85,6 @@ cron.schedule("0 * * * *", () => {
 			}
 		});
 	}
-});
-
-// Public health check endpoint (GET for browsers/curl, HEAD for UptimeRobot)
-// app.get("/health", (req, res) => {
-// 	res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
-// });
-app.head("/health", (req, res) => {
-	res.sendStatus(200);
 });
 
 app.use("/api/users", userRoutes);
