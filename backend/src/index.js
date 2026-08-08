@@ -78,9 +78,12 @@ cron.schedule("0 * * * *", () => {
 	}
 });
 
-// Public health check endpoint
+// Public health check endpoint (GET for browsers/curl, HEAD for UptimeRobot)
 app.get("/health", (req, res) => {
 	res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+app.head("/health", (req, res) => {
+	res.sendStatus(200);
 });
 
 app.use("/api/users", userRoutes);
